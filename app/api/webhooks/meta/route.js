@@ -15,8 +15,22 @@ export async function POST(request) {
     if (!verifySignature(raw,request.headers.get('x-hub-signature-256'),process.env.META_APP_SECRET)) throw new AppError('Firma inválida.',401);
     let payload;
     try { payload = JSON.parse(raw.toString('utf8')); } catch { throw new AppError('JSON no válido.'); }
-    if (payload.object !== 'whatsapp_business_account') return result({ok:true});
     const db = adminClient();
+    if (payload.object === 'page' || payload.object === 'instagram') {
+      for (const entry of payload.entry || []) {
+        const pageId = entry.id;
+        const { data: channels } = await db.from('meta_channels').select('channel,page_id').eq('page_id', pageId);
+        const channel = channels?.[0]?.channel || (payload.object === 'instagram' ? 'instagram' : 'facebook');
+        for (const event of entry.messaging || []) {
+          const message = event.message;
+          if (!message?.mid || !event.sender?.id || typeof message.text !== 'string') continue;
+          const stamp = Number(event.timestamp || Date.now());
+          await rpc(db,'record_meta_inbound',{meta_id:message.mid,channel_name:channel,meta_page_id:pageId,sender:event.sender.id,body:message.text,event_time:new Date(stamp)});
+        }
+      }
+      return result({ok:true});
+    }
+    if (payload.object !== 'whatsapp_business_account') return result({ok:true});
     for (const entry of payload.entry || []) {
       for (const change of entry.changes || []) {
         if (change.field !== 'messages') continue;

@@ -11,6 +11,7 @@ Aplicación Next.js con Supabase Auth y PostgreSQL. Demo interactiva en `/?demo=
 - Panel del cliente, resumen mensual, últimos 200 mensajes, detalle de mensajes y actividad operativa.
 - Panel global para cuentas y planes; el administrador puede abrir un negocio para gestionar su equipo y configuración.
 - Conexión manual de WhatsApp Cloud API: validación de número y WABA, cifrado AES-256-GCM de tokens, webhook firmado, recepción de mensajes y estados, envío de texto y plantillas de texto.
+- Configuración de Instagram Messaging y Facebook Messenger por negocio: Page ID, cuenta vinculada, token cifrado, conexión/desconexión y recepción de mensajes de texto mediante el webhook de Meta.
 - Controles transaccionales de cupos, límite de 30 envíos/minuto por negocio, idempotencia y protección de la ventana de 24 horas.
 - Compilación para Vercel y salida Node.js standalone para un posterior servidor Hostinger.
 
@@ -87,6 +88,7 @@ node tests/http-smoke.mjs http://127.0.0.1:3100
 - Los mensajes se actualizan al pulsar Actualizar; no se mantiene una conexión realtime ni un proceso permanente.
 - El panel muestra hasta 200 mensajes recientes. El historial completo permanece en PostgreSQL.
 - Recepción de multimedia: se registra el tipo; no se descargan archivos. Envío: texto y plantillas con variables de texto en el cuerpo, sin encabezados multimedia ni botones dinámicos.
+- Instagram y Facebook requieren ejecutar `supabase/002_meta_social_channels.sql` después del esquema inicial. El envío social usa texto y destinatario por ID; la UI no implementa todavía adjuntos, botones ni plantillas específicas de Messenger.
 - Los tokens de Meta se introducen manualmente. Embedded Signup, revisión de la app y gestión automatizada de alta de clientes no forman parte de esta versión.
 - Una sola app de Meta sirve los negocios; todos sus números deben estar suscritos a esa app. Para apps distintas por cliente, adaptar la selección de secretos del webhook.
 - Los intentos reservados consumen cuota aunque fallen. Un timeout queda como `unknown`; un proceso interrumpido puede quedar `sending`. Nunca se reintenta un envío ambiguo automáticamente.
