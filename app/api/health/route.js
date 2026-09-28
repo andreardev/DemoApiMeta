@@ -1,0 +1,2 @@
+import { result } from '../../../lib/server';
+export async function GET() { return result({ status:'ok', service:'nexo', supabaseConfigured:Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY), whatsappConfigured:Boolean(process.env.ENCRYPTION_KEY && process.env.META_APP_SECRET && process.env.META_VERIFY_TOKEN && process.env.META_GRAPH_VERSION) }); }
